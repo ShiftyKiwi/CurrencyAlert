@@ -1,5 +1,5 @@
 # CurrencyAlert
-[![Download count](https://img.shields.io/endpoint?url=https://qzysathwfhebdai6xgauhz4q7m0mzmrf.lambda-url.us-east-1.on.aws/CurrencyAlert)](https://github.com/MidoriKami/CurrencyAlert)
+[![Download count](https://img.shields.io/endpoint?url=https://qzysathwfhebdai6xgauhz4q7m0mzmrf.lambda-url.us-east-1.on.aws/CurrencyAlert)](https://github.com/ShiftyKiwi/CurrencyAlert)
 
 Currency Alert is a FFXIV/Dalamud plugin for showing configurable warnings related to your currency.
 

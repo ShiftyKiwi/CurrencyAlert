@@ -1,6 +1,6 @@
 [submodule "KamiLib"]
 	path = KamiLib
-	url = https://github.com/MidoriKami/KamiLib
+	url = https://github.com/ShiftyKiwi/KamiLib
 [submodule "KamiToolKit"]
 	path = KamiToolKit
-	url = https://github.com/MidoriKami/KamiToolKit
+	url = https://github.com/ShiftyKiwi/KamiToolKit

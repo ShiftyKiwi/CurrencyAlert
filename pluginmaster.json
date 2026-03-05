@@ -1,0 +1,23 @@
+[
+  {
+    "Author": "ShiftyKiwi",
+    "Name": "CurrencyAlert",
+    "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
+    "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
+    "InternalName": "CurrencyAlert",
+    "AssemblyVersion": "2.2.2.3",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 14,
+    "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
+    "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
+    "Tags": [
+      "Currency",
+      "Tomestones",
+      "Alert",
+      "Tracker"
+    ],
+    "IsHide": false,
+    "IsTestingExclusive": false
+  }
+]
