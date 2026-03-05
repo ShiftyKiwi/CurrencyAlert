@@ -122,7 +122,7 @@ public class OverlayListNode : SimpleComponentNode {
 			node.RecalculateLayout();
 		}
 
-		listNode.EnableEventFlags = NodeList.Count is 0 && !System.Config.DisableInteraction;
+		listNode.EnableEventFlags = NodeList.Count > 0 && !System.Config.DisableInteraction;
 		listNode.RecalculateLayout();
 	}
 
