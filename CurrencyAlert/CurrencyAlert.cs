@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using CurrencyAlert.Classes;
 using CurrencyAlert.Windows;
@@ -7,21 +7,29 @@ using Dalamud.Plugin.Services;
 using KamiLib.CommandManager;
 using KamiLib.Window;
 using KamiToolKit;
+using Lumina.Excel.Sheets;
 
 namespace CurrencyAlert;
 
 public sealed class CurrencyAlertPlugin : IDalamudPlugin {
+    private const int ConfigVersion = 8;
+
     public CurrencyAlertPlugin(IDalamudPluginInterface pluginInterface) {
         pluginInterface.Create<Service>();
-        
+
         System.Config = Configuration.Load();
         System.CommandManager = new CommandManager(Service.PluginInterface, "currencyalert", "calert");
 
-        if (System.Config is { Currencies.Count: 0 } or { Currencies: null } or { Version: not 7 }) {
-            Service.Log.Verbose("Generating Initial Currency List.");
+        if (System.Config is { Currencies.Count: 0 } or { Currencies: null }) {
+            Service.Log.Verbose("Generating initial currency list.");
 
             System.Config.Currencies = GenerateInitialList();
-            System.Config.Version = 7;
+            System.Config.Version = ConfigVersion;
+            System.Config.Save();
+        } else if (System.Config.Version != ConfigVersion) {
+            Service.Log.Verbose("Migrating currency configuration.");
+            MigrateConfiguration();
+            System.Config.Version = ConfigVersion;
             System.Config.Save();
         }
 
@@ -61,6 +69,41 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
         }
     }
 
+    private static void MigrateConfiguration() {
+        var sheet = Service.DataManager.GetExcelSheet<Item>();
+        var obsoleteTomestoneIds = Service.DataManager
+            .GetExcelSheet<TomestonesItem>()
+            .Where(item => item.Tomestones.RowId is 0)
+            .Select(item => item.Item.RowId)
+            .ToHashSet();
+
+        // Remove invalid/deprecated item entries for regular item tracking.
+        System.Config.Currencies.RemoveAll(currency => currency.Type switch {
+            CurrencyType.Item or CurrencyType.HighQualityItem or CurrencyType.Collectable =>
+                currency.ItemId == 0 ||
+                sheet.GetRow(currency.ItemId).RowId == 0 ||
+                obsoleteTomestoneIds.Contains(currency.ItemId),
+            _ => false,
+        });
+
+        AddDefaultCurrencyIfMissing(CurrencyType.NonLimitedTomestone, 1400);
+        AddDefaultCurrencyIfMissing(CurrencyType.LimitedTomestone, 1400);
+        AddDefaultCurrencyIfMissing(CurrencyType.EvergreenTomestone, 1400);
+
+        AddDefaultCurrencyIfMissing(CurrencyType.CurrentCraftersScrip, 3400);
+        AddDefaultCurrencyIfMissing(CurrencyType.PreviousCraftersScrip, 3400);
+        AddDefaultCurrencyIfMissing(CurrencyType.CurrentGatherersScrip, 3400);
+        AddDefaultCurrencyIfMissing(CurrencyType.PreviousGatherersScrip, 3400);
+    }
+
+    private static void AddDefaultCurrencyIfMissing(CurrencyType type, int threshold) {
+        if (System.Config.Currencies.Any(currency => currency.Type == type)) return;
+
+        System.Config.Currencies.Add(new TrackedCurrency {
+            Type = type, Threshold = threshold, Enabled = true,
+        });
+    }
+
     private static List<TrackedCurrency> GenerateInitialList() => [
         new() { Type = CurrencyType.Item, ItemId = 20, Threshold = 75000, Enabled = true, }, // StormSeal
         new() { Type = CurrencyType.Item, ItemId = 21, Threshold = 75000, Enabled = true, }, // SerpentSeal
@@ -75,9 +118,14 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
 
         new() { Type = CurrencyType.Item, ItemId = 26807, Threshold = 800, Enabled = true, }, // BicolorGemstones
 
-        new() { Type = CurrencyType.Item, ItemId = 28, Threshold = 1400, Enabled = true, }, // Poetics
-        new() { Type = CurrencyType.NonLimitedTomestone, Threshold = 1400, Enabled = true, }, // NonLimitedTomestone
+        new() { Type = CurrencyType.NonLimitedTomestone, Threshold = 1400, Enabled = true, }, // StandardTomestone
         new() { Type = CurrencyType.LimitedTomestone, Threshold = 1400, Enabled = true, }, // LimitedTomestone
+        new() { Type = CurrencyType.EvergreenTomestone, Threshold = 1400, Enabled = true, }, // EvergreenTomestone
+
+        new() { Type = CurrencyType.CurrentCraftersScrip, Threshold = 3400, Enabled = true, }, // Current Crafters' Scrip
+        new() { Type = CurrencyType.PreviousCraftersScrip, Threshold = 3400, Enabled = true, }, // Previous Crafters' Scrip
+        new() { Type = CurrencyType.CurrentGatherersScrip, Threshold = 3400, Enabled = true, }, // Current Gatherers' Scrip
+        new() { Type = CurrencyType.PreviousGatherersScrip, Threshold = 3400, Enabled = true, }, // Previous Gatherers' Scrip
 
         new() { Type = CurrencyType.Item, ItemId = 28063, Threshold = 7500, Enabled = true, }, // Skybuilders scripts
     ];

@@ -46,15 +46,13 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     ];
 
     protected override void DrawListOption(TrackedCurrency option) {
-        // If ID is zero, and type is LimitedTomestone, then the limited tomestone doesn't exist.
-        // This only happens between expansion release and the release of savage, so this won't be relevant again for 2-3 years.
-        if (option is { ItemId: 0, Type: CurrencyType.LimitedTomestone }) {
+        if (option.IsUnavailableSpecialCurrency) {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 3.0f * ImGuiHelpers.GlobalScale);
             ImGui.Image(Service.TextureProvider.GetFromGameIcon(60071).GetWrapOrEmpty().Handle, ImGuiHelpers.ScaledVector2(24.0f));
 
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Limited Tomestone (Currently Unavailable)");
+            ImGui.Text(option.Name);
 
             return;
         }
@@ -82,10 +80,8 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
         var region = ImGui.GetContentRegionAvail();
         var minDimension = Math.Min(region.X, region.Y);
 
-        // If ID is zero, and type is LimitedTomestone, then the limited tomestone doesn't exist.
-        // This only happens between expansion release and the release of savage, so this won't be relevant again for 2-3 years.
-        if (currency is { ItemId: 0, Type: CurrencyType.LimitedTomestone }) {
-            const string text = "Limited Tomestone (Currently Unavailable)";
+        if (currency.IsUnavailableSpecialCurrency) {
+            var text = currency.Name;
             var textSize = ImGui.CalcTextSize(text);
             ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X / 2.0f - textSize.X / 2.0f);
             ImGui.Text(text);
