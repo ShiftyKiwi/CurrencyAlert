@@ -73,6 +73,9 @@ public class CurrencyWarningNode : SimpleComponentNode {
         
         currencyIcon.IconId = Currency.IconId;
         warningText.Text = Currency.ShowItemName ? $"{Currency.Name} {Currency.WarningText}" : $"{Currency.WarningText}";
+        // Ensure text sizing follows current content even if older style files saved a large fixed width.
+        var textDrawSize = warningText.GetTextDrawSize(warningText.Text);
+        warningText.Width = MathF.Max(1.0f, textDrawSize.X + 6.0f);
         currencyIcon.ItemCount = Currency.CurrentCount;
         IsVisible = true;
         
@@ -119,7 +122,7 @@ public class CurrencyWarningNode : SimpleComponentNode {
 
         if (warningText.IsVisible) {
             warningText.X = currentPosition;
-            currentPosition += warningText.LayoutSize.X;
+            currentPosition += warningText.Width;
         }
         
         background.Width = currentPosition + 10.0f;
