@@ -1,10 +1,10 @@
 {
   "Author": "ShiftyKiwi",
-  "Name": "CurrencyAlert",
+  "Name": "KiwiCurrencyAlert",
   "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
   "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
   "Tags": [    "Currency",    "Tomestones",    "Alert",    "Tracker"  ],
-  "InternalName": "CurrencyAlert",
+  "InternalName": "KiwiCurrencyAlert",
   "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
   "AcceptsFeedback": false
 }
