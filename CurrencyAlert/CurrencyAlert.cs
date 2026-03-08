@@ -13,22 +13,34 @@ namespace CurrencyAlert;
 
 public sealed class CurrencyAlertPlugin : IDalamudPlugin {
     private const int ConfigVersion = 9;
+    private const long ChatWarningDebounceMilliseconds = 5000;
+
+    private ushort lastChatWarningTerritoryId;
+    private long lastChatWarningTimestamp;
 
     public CurrencyAlertPlugin(IDalamudPluginInterface pluginInterface) {
         pluginInterface.Create<Service>();
 
         System.Config = Configuration.Load();
         System.CommandManager = new CommandManager(Service.PluginInterface, "currencyalert", "calert");
+        var configChanged = false;
 
         if (System.Config is { Currencies.Count: 0 } or { Currencies: null }) {
             Service.Log.Verbose("Generating initial currency list.");
 
             System.Config.Currencies = GenerateInitialList();
-            System.Config.Version = ConfigVersion;
-            System.Config.Save();
+            configChanged = true;
         } else if (System.Config.Version != ConfigVersion) {
             Service.Log.Verbose("Migrating currency configuration.");
             MigrateConfiguration();
+            configChanged = true;
+        }
+
+        if (NormalizeCurrencyOrder()) {
+            configChanged = true;
+        }
+
+        if (configChanged) {
             System.Config.Version = ConfigVersion;
             System.Config.Save();
         }
@@ -64,8 +76,24 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
     private void OnZoneChange(ushort e) {
         if (System.Config is { ChatWarning: false }) return;
 
-        foreach (var currency in System.Config.Currencies.Where(currency => currency is { HasWarning: true, ChatWarning: true, Enabled: true })) {
-            Service.ChatGui.Print($"{currency.Name} is {(currency.Invert ? "below" : "above")} threshold.", "CurrencyAlert", 43);
+        var warningMessages = System.Config.Currencies
+            .Where(currency => currency is { HasWarning: true, ChatWarning: true, Enabled: true })
+            .Select(currency => $"{currency.Name} is {(currency.Invert ? "below" : "above")} threshold.")
+            .Distinct()
+            .ToList();
+
+        if (warningMessages.Count == 0) return;
+
+        var now = global::System.Environment.TickCount64;
+        if (lastChatWarningTerritoryId == e && now - lastChatWarningTimestamp < ChatWarningDebounceMilliseconds) {
+            return;
+        }
+
+        lastChatWarningTerritoryId = e;
+        lastChatWarningTimestamp = now;
+
+        foreach (var warningMessage in warningMessages) {
+            Service.ChatGui.Print(warningMessage, "CurrencyAlert", 43);
         }
     }
 
@@ -111,6 +139,44 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
             Type = type, Threshold = threshold, Enabled = true,
         });
     }
+
+    private static bool NormalizeCurrencyOrder() {
+        var orderedCurrencies = System.Config.Currencies
+            .OrderBy(GetCurrencySortOrder)
+            .ToList();
+
+        if (System.Config.Currencies.SequenceEqual(orderedCurrencies)) {
+            return false;
+        }
+
+        System.Config.Currencies.Clear();
+        System.Config.Currencies.AddRange(orderedCurrencies);
+        return true;
+    }
+
+    private static int GetCurrencySortOrder(TrackedCurrency currency) => currency.Type switch {
+        CurrencyType.Item when currency.ItemId == 20 => 0,
+        CurrencyType.Item when currency.ItemId == 21 => 1,
+        CurrencyType.Item when currency.ItemId == 22 => 2,
+        CurrencyType.Item when currency.ItemId == 25 => 3,
+        CurrencyType.Item when currency.ItemId == 36656 => 4,
+        CurrencyType.Item when currency.ItemId == 27 => 5,
+        CurrencyType.Item when currency.ItemId == 10307 => 6,
+        CurrencyType.Item when currency.ItemId == 26533 => 7,
+        CurrencyType.Item when currency.ItemId == 26807 => 8,
+        CurrencyType.NonLimitedTomestone => 9,
+        CurrencyType.LimitedTomestone => 10,
+        CurrencyType.EvergreenTomestone => 11,
+        CurrencyType.DiscontinuedTomestone => 12,
+        CurrencyType.CurrentCraftersScrip => 13,
+        CurrencyType.PreviousCraftersScrip => 14,
+        CurrencyType.DiscontinuedCraftersScrip => 15,
+        CurrencyType.CurrentGatherersScrip => 16,
+        CurrencyType.PreviousGatherersScrip => 17,
+        CurrencyType.DiscontinuedGatherersScrip => 18,
+        CurrencyType.Item when currency.ItemId == 28063 => 19,
+        _ => int.MaxValue,
+    };
 
     private static List<CurrencyType> GetManagedSpecialCurrencyTypes() => [
         CurrencyType.NonLimitedTomestone,

@@ -161,7 +161,7 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
 
         ImGuiHelpers.ScaledDummy(5.0f);
 
-        configChanged |= ImGuiTweaks.Checkbox("Chat Warning", ref currency.ChatWarning, "When amount is above threshold, print a message to chat when changing zones");
+        configChanged |= ImGuiTweaks.Checkbox("Chat Warning", ref currency.ChatWarning, "When warning conditions are met, print a message to chat when changing zones");
         configChanged |= ImGuiTweaks.Checkbox("Invert", ref currency.Invert, "Warn when below the threshold instead of above");
         configChanged |= ImGuiTweaks.Checkbox("Overlay", ref currency.ShowInOverlay, "Allows this currency to show in the overlay");
         configChanged |= ImGuiTweaks.Checkbox("Overlay Show Name", ref currency.ShowItemName, "Show item name in the overlay");

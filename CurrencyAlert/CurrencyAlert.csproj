@@ -1,7 +1,7 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.0">
     <PropertyGroup>
         <PackageProjectUrl>https://github.com/ShiftyKiwi/CurrencyAlert.git</PackageProjectUrl>
-        <Version>2.2.2.10</Version>
+        <Version>2.2.2.11</Version>
         <AssemblyName>KiwiCurrencyAlert</AssemblyName>
         <TargetFramework>net10.0-windows</TargetFramework>
         <DalamudApiLevel>14</DalamudApiLevel>
