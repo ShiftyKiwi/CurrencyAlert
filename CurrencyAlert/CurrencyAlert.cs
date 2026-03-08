@@ -12,7 +12,7 @@ using Lumina.Excel.Sheets;
 namespace CurrencyAlert;
 
 public sealed class CurrencyAlertPlugin : IDalamudPlugin {
-    private const int ConfigVersion = 8;
+    private const int ConfigVersion = 9;
 
     public CurrencyAlertPlugin(IDalamudPluginInterface pluginInterface) {
         pluginInterface.Create<Service>();
@@ -76,13 +76,21 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
             .Where(item => item.Tomestones.RowId is 0)
             .Select(item => item.Item.RowId)
             .ToHashSet();
+        var managedSpecialCurrencyItemIds = GetManagedSpecialCurrencyTypes()
+            .Select(type => new TrackedCurrency {
+                Type = type, Threshold = 0,
+            }.ItemId)
+            .Where(itemId => itemId != 0)
+            .ToHashSet();
 
-        // Remove invalid/deprecated item entries for regular item tracking.
+        // Remove invalid/deprecated item entries for regular item tracking,
+        // including legacy manual entries that now have dedicated special trackers.
         System.Config.Currencies.RemoveAll(currency => currency.Type switch {
             CurrencyType.Item or CurrencyType.HighQualityItem or CurrencyType.Collectable =>
                 currency.ItemId == 0 ||
                 sheet.GetRow(currency.ItemId).RowId == 0 ||
-                obsoleteTomestoneIds.Contains(currency.ItemId),
+                obsoleteTomestoneIds.Contains(currency.ItemId) ||
+                managedSpecialCurrencyItemIds.Contains(currency.ItemId),
             _ => false,
         });
 
@@ -103,6 +111,16 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
             Type = type, Threshold = threshold, Enabled = true,
         });
     }
+
+    private static List<CurrencyType> GetManagedSpecialCurrencyTypes() => [
+        CurrencyType.NonLimitedTomestone,
+        CurrencyType.LimitedTomestone,
+        CurrencyType.EvergreenTomestone,
+        CurrencyType.CurrentCraftersScrip,
+        CurrencyType.PreviousCraftersScrip,
+        CurrencyType.CurrentGatherersScrip,
+        CurrencyType.PreviousGatherersScrip,
+    ];
 
     private static List<TrackedCurrency> GenerateInitialList() => [
         new() { Type = CurrencyType.Item, ItemId = 20, Threshold = 75000, Enabled = true, }, // StormSeal

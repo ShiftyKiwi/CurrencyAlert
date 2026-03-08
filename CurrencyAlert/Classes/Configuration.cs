@@ -12,7 +12,7 @@ public class Configuration : IPluginConfiguration {
     public bool DisableInteraction = false;
     public bool OverlayEnabled = true;
 
-    public int Version { get; set; } = 8;
+    public int Version { get; set; } = 9;
 
     public static Configuration Load()
         => Service.PluginInterface.LoadConfigFile("CurrencyAlert.config.json", () => new Configuration());

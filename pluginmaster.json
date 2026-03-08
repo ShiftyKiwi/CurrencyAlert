@@ -5,7 +5,7 @@
     "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
     "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
     "InternalName": "KiwiCurrencyAlert",
-    "AssemblyVersion": "2.2.2.8",
+    "AssemblyVersion": "2.2.2.9",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 14,
     "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
