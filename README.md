@@ -38,3 +38,7 @@ Upon clicking one of the add buttons, a search window will appear where you can 
 > Item data is pulled directly from the game data, items that are no longer obtainable, or invalid will still show in the list.
 
 ![image](https://github.com/user-attachments/assets/2c60db86-3f88-42b7-a7bc-76aab3e313a0)
+
+
+Validated for FFXIV Patch 7.45 HotFix Patch 2 on March 24, 2026.
+

@@ -4,8 +4,9 @@
     "Name": "KiwiCurrencyAlert",
     "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
     "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
+    "Changelog": "Validated for FFXIV Patch 7.45 HotFix Patch 2 on March 24, 2026.",
     "InternalName": "KiwiCurrencyAlert",
-    "AssemblyVersion": "2.2.2.13",
+    "AssemblyVersion": "2.2.2.14",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 14,
     "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
@@ -18,7 +19,11 @@
       "Tracker"
     ],
     "IsHide": false,
-    "IsTestingExclusive": false
+    "IsTestingExclusive": false,
+    "LastUpdate": "1774346771"
   }
 ]
+
+
+
 
