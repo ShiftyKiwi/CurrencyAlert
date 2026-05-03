@@ -40,5 +40,5 @@ Upon clicking one of the add buttons, a search window will appear where you can 
 ![image](https://github.com/user-attachments/assets/2c60db86-3f88-42b7-a7bc-76aab3e313a0)
 
 
-Validated for FFXIV Patch 7.45 HotFix Patch 2 on March 24, 2026.
+Updated for FFXIV Patch 7.5 and Dalamud API15.
 

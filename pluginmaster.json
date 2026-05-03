@@ -4,11 +4,11 @@
     "Name": "KiwiCurrencyAlert",
     "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
     "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
-    "Changelog": "Validated for FFXIV Patch 7.45 HotFix Patch 2 on March 24, 2026.",
+    "Changelog": "Updated for FFXIV Patch 7.5 and Dalamud API15.",
     "InternalName": "KiwiCurrencyAlert",
-    "AssemblyVersion": "2.2.2.14",
+    "AssemblyVersion": "2.2.2.15",
     "ApplicableVersion": "any",
-    "DalamudApiLevel": 14,
+    "DalamudApiLevel": 15,
     "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
     "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
     "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
@@ -20,7 +20,7 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": "1774346771"
+    "LastUpdate": "1777847205"
   }
 ]
 

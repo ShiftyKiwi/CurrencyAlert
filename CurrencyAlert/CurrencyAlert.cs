@@ -15,7 +15,7 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
     private const int ConfigVersion = 9;
     private const long ChatWarningDebounceMilliseconds = 5000;
 
-    private ushort lastChatWarningTerritoryId;
+    private uint lastChatWarningTerritoryId;
     private long lastChatWarningTimestamp;
 
     public CurrencyAlertPlugin(IDalamudPluginInterface pluginInterface) {
@@ -73,7 +73,7 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
         System.OverlayController.Update();
     }
 
-    private void OnZoneChange(ushort e) {
+    private void OnZoneChange(uint e) {
         if (System.Config is { ChatWarning: false }) return;
 
         var warningMessages = System.Config.Currencies
