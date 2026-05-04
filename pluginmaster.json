@@ -4,14 +4,15 @@
     "Name": "KiwiCurrencyAlert",
     "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
     "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
-    "Changelog": "Updated for FFXIV Patch 7.5 and Dalamud API15.",
+    "Changelog": "Normalized xlplugins release metadata for Patch 7.5 and Dalamud API15.",
     "InternalName": "KiwiCurrencyAlert",
-    "AssemblyVersion": "2.2.2.15",
+    "AssemblyVersion": "2.2.2.16",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
     "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
-    "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/latest/download/latest.zip",
+    "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
+    "DownloadLinkTesting": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
     "Tags": [
       "Currency",
       "Tomestones",
@@ -20,7 +21,7 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": "1777847205"
+    "LastUpdate": "1777914087"
   }
 ]
 
