@@ -29,7 +29,7 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
 
     protected override List<TrackedCurrency> Options => System.Config.Currencies;
     
-    protected override float SelectionListWidth => 150.0f;
+    protected override float SelectionListWidth => 210.0f;
     
     protected override float SelectionItemHeight => 20.0f;
     
@@ -46,17 +46,6 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     ];
 
     protected override void DrawListOption(TrackedCurrency option) {
-        if (option.IsUnavailableSpecialCurrency) {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 3.0f * ImGuiHelpers.GlobalScale);
-            ImGui.Image(Service.TextureProvider.GetFromGameIcon(60071).GetWrapOrEmpty().Handle, ImGuiHelpers.ScaledVector2(24.0f));
-
-            ImGui.SameLine();
-            ImGui.AlignTextToFramePadding();
-            ImGui.Text(option.Name);
-
-            return;
-        }
-
         if (option is { Name: var name, Icon: { } icon }) {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 3.0f * ImGuiHelpers.GlobalScale);
             ImGui.Image(icon.Handle, ImGuiHelpers.ScaledVector2(24.0f));
@@ -80,23 +69,6 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
         var region = ImGui.GetContentRegionAvail();
         var minDimension = Math.Min(region.X, region.Y);
 
-        if (currency.IsUnavailableSpecialCurrency) {
-            var text = currency.Name;
-            var textSize = ImGui.CalcTextSize(text);
-            ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X / 2.0f - textSize.X / 2.0f);
-            ImGui.Text(text);
-            ImGui.Separator();
-
-            var areaStart = ImGui.GetCursorPos();
-            ImGui.SetCursorPosX(region.X / 2.0f - minDimension / 2.0f);
-            ImGui.Image(Service.TextureProvider.GetFromGameIcon(60071).GetWrapOrEmpty().Handle, new Vector2(minDimension), Vector2.Zero, Vector2.One, Vector4.One with {
-                W = 0.10f,
-            });
-            ImGui.SetCursorPos(areaStart);
-
-            return;
-        }
-
         if (currency is { Name: var name }) {
             var textSize = ImGui.CalcTextSize(name);
             ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X / 2.0f - textSize.X / 2.0f);
@@ -113,9 +85,22 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     }
 
     private void DrawCurrentStatus(TrackedCurrency currency) {
-        if (currency is not { CurrentCount: var currentCount, Threshold: var threshold }) return;
+        var balance = currency.Balance;
+        if (!balance.IsAvailable) {
+            ImGui.TextColored(KnownColor.Orange.Vector(), balance.Status switch {
+                CurrencyCountStatus.NotLoaded => "Balance not loaded. Log in to read this currency.",
+                CurrencyCountStatus.Unsupported => "This client does not expose a safe balance reader for this currency.",
+                _ => "Balance unavailable. No alert will be raised until it can be read.",
+            });
+            ImGuiHelpers.ScaledDummy(5.0f);
+            return;
+        }
 
-        var color = ((float) currentCount / threshold) switch {
+        var currentCount = balance.Count;
+        var threshold = currency.Threshold;
+
+        var ratio = threshold > 0 ? (float) currentCount / threshold : 0.0f;
+        var color = ratio switch {
             < 0.75f => currency.Invert ? KnownColor.Red.Vector() : KnownColor.White.Vector(),
             < 0.85f => currency.Invert ? KnownColor.Red.Vector() : KnownColor.Orange.Vector(),
             < 0.95f => currency.Invert ? KnownColor.Red.Vector() : KnownColor.OrangeRed.Vector(),
@@ -153,7 +138,7 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     }
 
     private void DrawSettings(TrackedCurrency currency) {
-        using var id = ImRaii.PushId(currency.ItemId.ToString());
+        using var id = ImRaii.PushId(currency.IdentityKey);
         
         var configChanged = false;
 
@@ -196,12 +181,22 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     }
 
     protected override void DrawExtraButton() {
-        using var spacingTable = ImRaii.Table("buttonTable", 3, ImGuiTableFlags.SizingStretchSame);
+        using var spacingTable = ImRaii.Table("buttonTable", 2, ImGuiTableFlags.SizingStretchSame);
         if (!spacingTable) return;
 
         ImGui.TableNextColumn();
-        if (ImGuiTweaks.IconButtonWithSize(Service.PluginInterface.UiBuilder.IconFontFixedWidthHandle, FontAwesomeIcon.Plus, "addNewCurrency", ImGui.GetContentRegionAvail(), "Add New Normal Item")) {
-            TryCloseAndRemoveItemListWindow();
+        if (ImGui.Button("Add Currency", ImGui.GetContentRegionAvail())) {
+            TryCloseAndRemoveSelectionWindows();
+
+            System.WindowManager.AddWindow(new CurrencySelectionWindow {
+                IsAlreadyTracked = definition => System.Config.Currencies.Any(currency => CurrencyCatalog.IsTracked(currency, definition)),
+                MultiSelectionCallback = AddSelectedCurrencies,
+            }, WindowFlags.OpenImmediately);
+        }
+
+        ImGui.TableNextColumn();
+        if (ImGui.Button("Add Item", ImGui.GetContentRegionAvail())) {
+            TryCloseAndRemoveSelectionWindows();
 
             System.WindowManager.AddWindow(new ItemSelectionWindow(Service.PluginInterface) {
                 MultiSelectionCallback = selected => AddSelectedItems(selected, CurrencyType.Item),
@@ -209,8 +204,8 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
         }
 
         ImGui.TableNextColumn();
-        if (ImGui.Button($"{SeIconChar.HighQuality.ToIconString()}##hqSearch", ImGui.GetContentRegionAvail())) {
-            TryCloseAndRemoveItemListWindow();
+        if (ImGui.Button($"{SeIconChar.HighQuality.ToIconString()} Add HQ", ImGui.GetContentRegionAvail())) {
+            TryCloseAndRemoveSelectionWindows();
 
             System.WindowManager.AddWindow(new HighQualityItemSelectionWindow(Service.PluginInterface) {
                 MultiSelectionCallback = selected => AddSelectedItems(selected, CurrencyType.HighQualityItem),
@@ -222,8 +217,8 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
         }
 
         ImGui.TableNextColumn();
-        if (ImGui.Button($"{SeIconChar.Collectible.ToIconString()}##collectableSearch", ImGui.GetContentRegionAvail())) {
-            TryCloseAndRemoveItemListWindow();
+        if (ImGui.Button($"{SeIconChar.Collectible.ToIconString()} Add Collectable", ImGui.GetContentRegionAvail())) {
+            TryCloseAndRemoveSelectionWindows();
 
             System.WindowManager.AddWindow(new CollectableItemSelectionWindow(Service.PluginInterface) {
                 MultiSelectionCallback = selected => AddSelectedItems(selected, CurrencyType.Collectable),
@@ -236,17 +231,36 @@ public class ConfigurationWindow : TabbedSelectionWindow<TrackedCurrency> {
     }
 
     private static void AddSelectedItems(List<Item> selected, CurrencyType type) {
+        var addedAny = false;
         foreach (var item in selected.Where(item => !System.Config.Currencies.Any(currency => currency.ItemId == item.RowId))) {
             System.Config.Currencies.Add(new TrackedCurrency {
                 Enabled = true, Threshold = 1000, Type = type, ItemId = item.RowId,
             });
+            addedAny = true;
         }
+
+        if (addedAny) System.Config.Save();
     }
 
-    private void TryCloseAndRemoveItemListWindow() {
+    private static void AddSelectedCurrencies(List<CurrencyDefinition> selected) {
+        var addedAny = false;
+        foreach (var definition in selected.Where(definition => !System.Config.Currencies.Any(currency => CurrencyCatalog.IsTracked(currency, definition)))) {
+            System.Config.Currencies.Add(definition.CreateTrackedCurrency());
+            addedAny = true;
+        }
+
+        if (addedAny) System.Config.Save();
+    }
+
+    private void TryCloseAndRemoveSelectionWindows() {
         if (System.WindowManager.GetWindow<SelectionWindowBase<Item>>() is { } existingWindow) {
             existingWindow.Close();
             System.WindowManager.RemoveWindow(existingWindow);
+        }
+
+        if (System.WindowManager.GetWindow<CurrencySelectionWindow>() is { } currencyWindow) {
+            currencyWindow.Close();
+            System.WindowManager.RemoveWindow(currencyWindow);
         }
     }
 

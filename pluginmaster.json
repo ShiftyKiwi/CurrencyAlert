@@ -4,15 +4,15 @@
     "Name": "KiwiCurrencyAlert",
     "Punchline": "Display alerts upon reaching configurable currencies thresholds.",
     "Description": "This plugin lets you easily manage your various currencies to prevent from wasting precious resources.",
-    "Changelog": "Normalized xlplugins release metadata for Patch 7.5 and Dalamud API15.",
+    "Changelog": "Expanded currency tracking through Patch 7.55 with safe native and content-state balance readers.",
     "InternalName": "KiwiCurrencyAlert",
-    "AssemblyVersion": "2.2.2.16",
+    "AssemblyVersion": "2.2.2.17",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
     "RepoUrl": "https://github.com/ShiftyKiwi/CurrencyAlert",
-    "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
-    "DownloadLinkTesting": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.16/latest.zip",
+    "DownloadLinkInstall": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.17/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.17/latest.zip",
+    "DownloadLinkTesting": "https://github.com/ShiftyKiwi/CurrencyAlert/releases/download/v2.2.2.17/latest.zip",
     "Tags": [
       "Currency",
       "Tomestones",
@@ -21,7 +21,7 @@
     ],
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": "1777914087"
+    "LastUpdate": 1786648520
   }
 ]
 

@@ -12,7 +12,7 @@ using Lumina.Excel.Sheets;
 namespace CurrencyAlert;
 
 public sealed class CurrencyAlertPlugin : IDalamudPlugin {
-    private const int ConfigVersion = 9;
+    private const int ConfigVersion = 10;
     private const long ChatWarningDebounceMilliseconds = 5000;
 
     private uint lastChatWarningTerritoryId;
@@ -115,10 +115,14 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
         // including legacy manual entries that now have dedicated special trackers.
         System.Config.Currencies.RemoveAll(currency => currency.Type switch {
             CurrencyType.Item or CurrencyType.HighQualityItem or CurrencyType.Collectable =>
-                currency.ItemId == 0 ||
-                sheet.GetRow(currency.ItemId).RowId == 0 ||
-                obsoleteTomestoneIds.Contains(currency.ItemId) ||
-                managedSpecialCurrencyItemIds.Contains(currency.ItemId),
+                currency.ItemId == 0
+                    // A catalog-backed non-item entry such as Company Credits has no Item
+                    // row by design. Preserve it so a later migration never silently drops
+                    // the user's explicit unsupported selection.
+                    ? CurrencyCatalog.GetDefinition(currency) is null
+                    : sheet.GetRow(currency.ItemId).RowId == 0 ||
+                      obsoleteTomestoneIds.Contains(currency.ItemId) ||
+                      managedSpecialCurrencyItemIds.Contains(currency.ItemId),
             _ => false,
         });
 
@@ -130,6 +134,13 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
         AddDefaultCurrencyIfMissing(CurrencyType.PreviousCraftersScrip, 3400);
         AddDefaultCurrencyIfMissing(CurrencyType.CurrentGatherersScrip, 3400);
         AddDefaultCurrencyIfMissing(CurrencyType.PreviousGatherersScrip, 3400);
+
+        // CurrencyKey is additive metadata.  Populate it for known entries so new
+        // definitions remain stable across display-name/localization changes without
+        // replacing any saved item IDs, thresholds, alert flags, or order.
+        foreach (var currency in System.Config.Currencies.Where(currency => string.IsNullOrEmpty(currency.CurrencyKey))) {
+            currency.CurrencyKey = CurrencyCatalog.GetDefinition(currency)?.Key;
+        }
     }
 
     private static void AddDefaultCurrencyIfMissing(CurrencyType type, int threshold) {

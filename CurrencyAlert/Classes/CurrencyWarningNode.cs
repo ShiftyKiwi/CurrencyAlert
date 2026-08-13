@@ -70,13 +70,28 @@ public class CurrencyWarningNode : SimpleComponentNode {
 
     public void UpdateFromCurrency() {
         if (Currency is null) return;
+
+        var balance = Currency.Balance;
+        if (!balance.IsAvailable) {
+            // A content manager can disappear between the warning pass and this
+            // render pass (for example during a zone transition).  Do not briefly
+            // render an unavailable balance as zero.
+            IsVisible = false;
+            return;
+        }
         
         currencyIcon.IconId = Currency.IconId;
-        warningText.Text = Currency.ShowItemName ? $"{Currency.Name} {Currency.WarningText}" : $"{Currency.WarningText}";
+        // Older configurations store "Above Threshold" as the default free-form label.
+        // Keep custom labels unchanged, but do not render the inherited default in the
+        // opposite direction when this tracker is configured to warn below its threshold.
+        var warningLabel = Currency.Invert && string.Equals(Currency.WarningText, "Above Threshold", StringComparison.Ordinal)
+            ? "Below Threshold"
+            : Currency.WarningText;
+        warningText.Text = Currency.ShowItemName ? $"{Currency.Name} {warningLabel}" : warningLabel;
         // Ensure text sizing follows current content even if older style files saved a large fixed width.
         var textDrawSize = warningText.GetTextDrawSize(warningText.Text);
         warningText.Width = MathF.Max(1.0f, textDrawSize.X + 6.0f);
-        currencyIcon.ItemCount = Currency.CurrentCount;
+        currencyIcon.ItemCount = balance.Count;
         IsVisible = true;
         
         RecalculateLayout();
