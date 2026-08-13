@@ -55,11 +55,13 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
 
         Service.ClientState.TerritoryChanged += OnZoneChange;
         Service.Framework.Update += OnFrameworkUpdate;
+        Service.PluginInterface.UiBuilder.OpenMainUi += OnOpenMainUi;
     }
 
     public void Dispose() {
         Service.ClientState.TerritoryChanged -= OnZoneChange;
         Service.Framework.Update -= OnFrameworkUpdate;
+        Service.PluginInterface.UiBuilder.OpenMainUi -= OnOpenMainUi;
 
         System.CommandManager.Dispose();
         System.WindowManager.Dispose();
@@ -71,6 +73,14 @@ public sealed class CurrencyAlertPlugin : IDalamudPlugin {
         if (!Service.ClientState.IsLoggedIn) return;
 
         System.OverlayController.Update();
+    }
+
+    // CurrencyAlert's configuration window is its primary user-facing entry point.
+    // Register it for Dalamud's Main UI action as well as the existing Config UI action.
+    private void OnOpenMainUi() {
+        if (!Service.ClientState.IsLoggedIn) return;
+
+        System.ConfigurationWindow.UnCollapseOrShow();
     }
 
     private void OnZoneChange(uint e) {
